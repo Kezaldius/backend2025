@@ -38,8 +38,11 @@ def get_user(user_id):
 
 @app.route('/user/<user_id>', methods=['DELETE'])
 def delete_user(user_id):
-    del users[user_id]
-    return '', 204
+    if user_id in users:
+        del users[user_id]
+        return '', 204
+    else:
+        return jsonify({"error": "User not found"}), 404
 
 @app.route('/category', methods = ['POST'])
 def create_categoires():
@@ -60,8 +63,12 @@ def get_categories():
 
 @app.route('/category/<category_id>', methods=['DELETE'])
 def delete_category(category_id):
-    del categories[category_id]
-    return '', 204
+    if category_id in categories:
+        del categories[category_id]
+        return '', 204
+    else:
+        return jsonify({"error": "Category not found"}), 404
+
 
 @app.route('/record', methods = ['POST'])
 def create_record():
@@ -89,8 +96,11 @@ def get_record(record_id):
 
 @app.route('/record/<record_id>', methods=['DELETE'])
 def delete_record(record_id):
-    del records[record_id]
-    return '', 204
+    if record_id in records:
+        del records[record_id]
+        return '', 204
+    else:
+        return jsonify({"error": "Record not found"}), 404
 
 @app.route('/record', methods=['GET'])
 def get_records():
