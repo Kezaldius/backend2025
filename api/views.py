@@ -1,6 +1,6 @@
 from api import app
 from flask import request, jsonify
-from datetime import datetime
+from datetime import datetime, timezone
 import uuid
 
 users = {}
@@ -79,7 +79,7 @@ def create_record():
         "id": record_id,
         "Id користувача": record_data.get("user_id"),
         "Id категорії": record_data.get("category_id"),
-        "Дата та час створення запису": datetime.now(datetime.timezone.utc).isoformat(),
+        "Дата та час створення запису": datetime.now(timezone.utc).isoformat(),
         "Сума витрати": record_data.get("Сума витрати")
     }
 
