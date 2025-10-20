@@ -39,3 +39,24 @@ def get_user(user_id):
 def delete_user(user_id):
     del users[user_id]
     return '', 204
+
+@app.route('/category', methods = ['POST'])
+def create_categoires():
+    category_data = request.get_json()
+    category_id = str(uuid.uuid4)
+
+    category = {
+        "id": category_id,
+        "Назва категорії": category_data.get("Назва категорії")
+    }
+
+@app.route('/category', methods = ['GET'])
+def get_categories():
+    return jsonify(list(categories.values())), 200
+
+@app.route('/category/<category_id>', methods=['DELETE'])
+def delete_category(category_id):
+    del categories[category_id]
+    return '', 204
+
+
