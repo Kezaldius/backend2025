@@ -32,11 +32,8 @@ cd backend2025
 ```bash
 docker-compose up --build -d
 ```
-4. Застосуйте міграції бази даних:  
-```bash
-docker-compose exec backend-container flask db upgrade
-```
-5. Тепер додаток готовий до роботи. Він буде доступний за адресою ```http://localhost:8080```
+
+4. Тепер додаток готовий до роботи. Він буде доступний за адресою ```http://localhost:8080```
 4. Щоб зупинити додаток та видалити контейнер, виконайте команду:
 ```bash
 docker-compose down

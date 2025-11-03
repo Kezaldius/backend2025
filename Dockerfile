@@ -5,5 +5,8 @@ COPY requirements.txt .
 RUN python -m pip install -r requirements.txt
 
 COPY . /app
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+ENTRYPOINT ["/app/entrypoint.sh"]
 
-CMD flask --app api run -h 0.0.0.0 -p $PORT
+CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:8080", "run:app"]
