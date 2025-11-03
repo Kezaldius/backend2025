@@ -14,29 +14,36 @@
 * Docker
 * Python 3.12+
 
-## Локальний запуск додатку за допомогою Docker Compose
+### Локальний запуск додатку за допомогою Docker Compose
 1. **Склонуйте репозиторій:**
 ```bash
 git clone https://github.com/Kezaldius/backend2025.git
 cd backend2025
 ```
-2. **Запустіть додаток:**  
+2. **Створіть файл конфігурації середовища:**  
+Створіть файл .env у кореневій папці проєкту та наповните його наступним вмістом:  
+```  
+  POSTGRES_USER=postgres  
+  POSTGRES_PASSWORD=postgres  
+  POSTGRES_DB=mydb  
+  ```
+3. **Запустіть додаток:**  
 Відкрийте термінал у кореневій папці проєкту та виконайте команду:
 ```bash
-docker-compose build
-docker-compose up
+docker-compose up --build -d
 ```
-  або 
+4. Застосуйте міграції бази даних:  
 ```bash
-docker-compose up --build
+docker-compose exec backend-container flask db upgrade
 ```
-3. Тепер додаток готовий до роботи. Він буде доступний за адресою ```http://localhost:8080```
+5. Тепер додаток готовий до роботи. Він буде доступний за адресою ```http://localhost:8080```
 4. Щоб зупинити додаток та видалити контейнер, виконайте команду:
 ```bash
 docker-compose down
 ```
 
-## Перевірка працездатності додатку
+## Робота з API
+### Перевірка працездатності додатку
 Щоб переконатися, що сервіс працює коректно, можна звернутися до ендпоінту healthcheck.  
 * URL: /healthcheck
 * Метод: GET
@@ -50,3 +57,7 @@ curl http://localhost:8080/healthcheck
   "message": "Application is healthy"  
 }  
   
+## Інтерактивна API Документація (Swagger UI)
+Додаток автоматично генерує документацію для всіх доступних ендпоінтів. Щоб переглянути її та тестувати API прямо з браузера, перейдіть за адресою:
+
+http://localhost:8080/swagger-ui
