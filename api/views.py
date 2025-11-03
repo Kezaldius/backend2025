@@ -1,121 +1,129 @@
-from api import app
-from flask import request, jsonify
-from datetime import datetime, timezone
-import uuid
+from flask import request
+from flask.views import MethodView
+from flask_smorest import Blueprint, abort
+from sqlalchemy import or_
 
-users = {}
-categories = {}
-records = {}
+from .models import db, UserModel, CategoryModel, RecordModel
+from .schemas import UserSchema, CategorySchema, RecordSchema
 
-@app.route("/healthcheck")
+blp = Blueprint("API", __name__, description="Operations for finance tracking API")
+
+@blp.route("/healthcheck")
 def healthcheck():
+    """Check the health of the application"""
     return {"status": "OK", "message": "Application is healthy"}
 
-@app.route("/user", methods=['POST'])
-def create_user():
-    user_data = request.get_json()
-    user_id = str(uuid.uuid4())
-
-    user = {
-        "id": user_id,
-        "Ім'я": user_data.get("Ім'я")
-    }
-    users[user_id] = user
-    return jsonify(user), 201
 
 
-@app.route('/users', methods=['GET'])
-def get_users():
-    return jsonify(list(users.values())), 200
+@blp.route("/user")
+class UserList(MethodView):
+    @blp.response(200, UserSchema(many=True))
+    def get(self):
+        """Get list of all users"""
+        return UserModel.query.all()
 
-@app.route('/user/<user_id>', methods=['GET'])
-def get_user(user_id):
-    user = users.get(user_id)
-    if user:
-        return jsonify(user), 200
-    return jsonify({"error": "User not found"}), 404
+    @blp.arguments(UserSchema)
+    @blp.response(201, UserSchema)
+    def post(self, user_data):
+        """Create a new user"""
+        if UserModel.query.filter(UserModel.name == user_data["name"]).first():
+            abort(409, message="A user with that name already exists.")
 
-
-@app.route('/user/<user_id>', methods=['DELETE'])
-def delete_user(user_id):
-    if user_id in users:
-        del users[user_id]
-        return '', 204
-    else:
-        return jsonify({"error": "User not found"}), 404
-
-@app.route('/category', methods = ['POST'])
-def create_categoires():
-    category_data = request.get_json()
-    category_id = str(uuid.uuid4())
-
-    category = {
-        "id": category_id,
-        "Назва категорії": category_data.get("Назва категорії")
-    }
-
-    categories[category_id] = category
-    return jsonify(category), 201
-
-@app.route('/category', methods = ['GET'])
-def get_categories():
-    return jsonify(list(categories.values())), 200
-
-@app.route('/category/<category_id>', methods=['DELETE'])
-def delete_category(category_id):
-    if category_id in categories:
-        del categories[category_id]
-        return '', 204
-    else:
-        return jsonify({"error": "Category not found"}), 404
+        user = UserModel(**user_data)
+        db.session.add(user)
+        db.session.commit()
+        return user
 
 
-@app.route('/record', methods = ['POST'])
-def create_record():
-    record_data = request.get_json()
-    record_id = str(uuid.uuid4())
+@blp.route("/user/<int:user_id>")
+class User(MethodView):
+    @blp.response(200, UserSchema)
+    def get(self, user_id):
+        """Get user by ID"""
+        return UserModel.query.get_or_404(user_id)
 
-    record = {
-        "id": record_id,
-        "Id користувача": record_data.get("user_id"),
-        "Id категорії": record_data.get("category_id"),
-        "Дата та час створення запису": datetime.now(timezone.utc).isoformat(),
-        "Сума витрати": record_data.get("Сума витрати")
-    }
+    @blp.response(204)
+    def delete(self, user_id):
+        """Delete user by ID"""
+        user = UserModel.query.get_or_404(user_id)
+        db.session.delete(user)
+        db.session.commit()
+        return ""
 
-    records[record_id] = record
-    return jsonify(record), 201
 
-@app.route('/record/<record_id>', methods=['GET'])
-def get_record(record_id):
-    record = records.get(record_id)
+@blp.route("/category")
+class CategoryList(MethodView):
+    @blp.response(200, CategorySchema(many=True))
+    def get(self):
+        """Get all general categories and user-specific categories"""
+        return CategoryModel.query.all()
 
-    if record:
-        return jsonify(record), 200
-    return jsonify({"error": "Record not found"}), 404
+    @blp.arguments(CategorySchema)
+    @blp.response(201, CategorySchema)
+    def post(self, category_data):
+        """Create a new category (general if user_id is null)"""
+        category = CategoryModel(**category_data)
+        db.session.add(category)
+        db.session.commit()
+        return category
 
-@app.route('/record/<record_id>', methods=['DELETE'])
-def delete_record(record_id):
-    if record_id in records:
-        del records[record_id]
-        return '', 204
-    else:
-        return jsonify({"error": "Record not found"}), 404
 
-@app.route('/record', methods=['GET'])
-def get_records():
-    user_id = request.args.get('user_id')
-    category_id = request.args.get('category_id')
+@blp.route("/category/<int:category_id>")
+class Category(MethodView):
+    @blp.response(200, CategorySchema)
+    def get(self, category_id):
+        """Get category by ID"""
+        return CategoryModel.query.get_or_404(category_id)
 
-    if not user_id and not category_id:
-        return jsonify({"error": "At least one parameter (user_id or category_id) is required"}), 400
-    
-    filtered_records = list(records.values())
-    if user_id:
-        filtered_records = [rec for rec in filtered_records if rec.get("Id користувача") == user_id]
-    if category_id:
-        filtered_records = [rec for rec in filtered_records if rec.get("Id категорії") == category_id]
+    @blp.response(204)
+    def delete(self, category_id):
+        """Delete category by ID"""
+        category = CategoryModel.query.get_or_404(category_id)
+        db.session.delete(category)
+        db.session.commit()
+        return ""
 
-    return jsonify(filtered_records), 200
-    
 
+@blp.route("/record")
+class RecordList(MethodView):
+    @blp.response(200, RecordSchema(many=True))
+    def get(self):
+        """Get records, filtered by user_id and/or category_id"""
+        user_id = request.args.get('user_id')
+        category_id = request.args.get('category_id')
+
+        if not user_id and not category_id:
+            abort(400, message="At least one parameter (user_id or category_id) is required.")
+
+        query = RecordModel.query
+        if user_id:
+            query = query.filter(RecordModel.user_id == user_id)
+        if category_id:
+            query = query.filter(RecordModel.category_id == category_id)
+
+        return query.all()
+
+    @blp.arguments(RecordSchema)
+    @blp.response(201, RecordSchema)
+    def post(self, record_data):
+        """Create a new record"""
+        record = RecordModel(**record_data)
+        db.session.add(record)
+        db.session.commit()
+        return record
+
+
+@blp.route("/record/<int:record_id>")
+class Record(MethodView):
+    @blp.response(200, RecordSchema)
+    def get(self, record_id):
+        """Get record by ID"""
+        return RecordModel.query.get_or_404(record_id)
+
+    @blp.response(204)
+    def delete(self, record_id):
+        """Delete record by ID"""
+        record = RecordModel.query.get_or_404(record_id)
+        db.session.delete(record)
+        db.session.commit()
+        return ""
