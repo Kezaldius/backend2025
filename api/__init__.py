@@ -1,4 +1,3 @@
-# api/__init__.py
 from flask import Flask, jsonify
 from flask_smorest import Api
 from flask_migrate import Migrate

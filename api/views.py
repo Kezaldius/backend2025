@@ -1,6 +1,6 @@
 from flask import request
 from flask.views import MethodView
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from flask_smorest import Blueprint, abort
 from sqlalchemy import or_
 
@@ -49,7 +49,7 @@ class UserLogin():
 
 
 
-
+@jwt_required()
 @blp.route("/user/<int:user_id>")
 class User(MethodView):
     @blp.response(200, UserSchema)
@@ -65,7 +65,7 @@ class User(MethodView):
         db.session.commit()
         return ""
 
-
+@jwt_required()
 @blp.route("/category")
 class CategoryList(MethodView):
     @blp.response(200, CategorySchema(many=True))
@@ -82,7 +82,7 @@ class CategoryList(MethodView):
         db.session.commit()
         return category
 
-
+@jwt_required()
 @blp.route("/category/<int:category_id>")
 class Category(MethodView):
     @blp.response(200, CategorySchema)
@@ -102,9 +102,10 @@ class Category(MethodView):
 @blp.route("/record")
 class RecordList(MethodView):
     @blp.response(200, RecordSchema(many=True))
+    @jwt_required()
     def get(self):
         """Get records, filtered by user_id and/or category_id"""
-        user_id = request.args.get('user_id')
+        user_id = get_jwt_identity()
         category_id = request.args.get('category_id')
 
         if not user_id and not category_id:
@@ -118,11 +119,14 @@ class RecordList(MethodView):
 
         return query.all()
 
+    @jwt_required()
     @blp.arguments(RecordSchema)
     @blp.response(201, RecordSchema)
     def post(self, record_data):
+
+        current_user_id = get_jwt_identity()
         """Create a new record"""
-        record = RecordModel(**record_data)
+        record = RecordModel(user_id = current_user_id, **record_data)
         db.session.add(record)
         db.session.commit()
         return record
@@ -130,11 +134,13 @@ class RecordList(MethodView):
 
 @blp.route("/record/<int:record_id>")
 class Record(MethodView):
+    @jwt_required()
     @blp.response(200, RecordSchema)
     def get(self, record_id):
         """Get record by ID"""
         return RecordModel.query.get_or_404(record_id)
 
+    @jwt_required()
     @blp.response(204)
     def delete(self, record_id):
         """Delete record by ID"""

@@ -13,7 +13,7 @@ class RecordSchema(Schema):
     sum = fields.Float(required=True)
     created_at = fields.Str(dump_only=True)
 
-    user_id = fields.Integer(required=True,load_only=True)
+    user_id = fields.Integer(dump_only = True)
     category_id = fields.Integer(required=True,load_only=True)
 
     user = fields.Nested(PlainUserSchema(), dump_only=True)
