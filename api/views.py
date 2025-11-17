@@ -15,7 +15,7 @@ def healthcheck():
     return {"status": "OK", "message": "Application is healthy"}
 
 
-blp.route("/debug_jwt")
+@blp.route("/debug_jwt")
 class JWTDebug(MethodView):
     def get(self):
         info = {}
