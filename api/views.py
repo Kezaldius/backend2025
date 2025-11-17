@@ -1,5 +1,6 @@
 from flask import request
 from flask.views import MethodView
+from flask_jwt_extended import create_access_token
 from flask_smorest import Blueprint, abort
 from sqlalchemy import or_
 
@@ -16,7 +17,7 @@ def healthcheck():
 
 
 @blp.route("/register", methods=["POST"])
-class UserList(MethodView):
+class UserRegister():
     @blp.arguments(UserSchema)
     @blp.response(201, UserSchema(exclude=("records", "categories")))
     def post(self, user_data):
@@ -31,6 +32,21 @@ class UserList(MethodView):
         db.session.add(user)
         db.session.commit()
         return user
+
+@blp.route("/login", methods=["POST"])
+class UserLogin():
+    def post(self):
+        """Login a user"""
+        user_data = request.get_json()
+
+        user = UserModel.query.filter(UserModel.id == user_data["name"]).first()
+
+        if user and user.check_password(user_data["password"]):
+            access_token = create_access_token(identity=user.id)
+            return {"access_token": access_token}, 200
+
+        abort(409, "Invalid password or login credentials")
+
 
 
 
