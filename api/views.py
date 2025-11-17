@@ -15,24 +15,23 @@ def healthcheck():
 
 
 
-@blp.route("/user")
+@blp.route("/register", methods=["POST"])
 class UserList(MethodView):
-    @blp.response(200, UserSchema(many=True))
-    def get(self):
-        """Get list of all users"""
-        return UserModel.query.all()
-
     @blp.arguments(UserSchema)
-    @blp.response(201, UserSchema)
+    @blp.response(201, UserSchema(exclude=("records", "categories")))
     def post(self, user_data):
-        """Create a new user"""
-        if UserModel.query.filter(UserModel.name == user_data["name"]).first():
-            abort(409, message="A user with that name already exists.")
+        """Register a new user"""
 
-        user = UserModel(**user_data)
+        if UserModel.query.filter(UserModel.name == user_data["name"]).first():
+            abort(409, "Username already exists")
+
+        user = UserModel(name=user_data["name"])
+        user.set_password(user_data["password"])
+
         db.session.add(user)
         db.session.commit()
         return user
+
 
 
 @blp.route("/user/<int:user_id>")

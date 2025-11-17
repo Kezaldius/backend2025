@@ -2,6 +2,7 @@
 from flask import Flask
 from flask_smorest import Api
 from flask_migrate import Migrate
+from flask_jwt_extended import JWTManager
 
 from .models import db
 
@@ -11,6 +12,7 @@ def create_app():
     app.config.from_object('config.Config')
 
     api = Api(app)
+    jwt = JWTManager(app)
     db.init_app(app)
     migrate = Migrate(app, db)
 

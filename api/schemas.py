@@ -6,6 +6,7 @@ class PlainCategorySchema(Schema):
 class PlainUserSchema(Schema):
     id = fields.Integer(dump_only=True)
     name = fields.String(required=True)
+    password = fields.String(required=True, load_only=True)
 
 class RecordSchema(Schema):
     id = fields.Integer(dump_only=True)
