@@ -72,7 +72,7 @@ class UserLogin(MethodView):
         user = UserModel.query.filter(UserModel.name == user_data["name"]).first()
 
         if user and user.check_password(user_data["password"]):
-            access_token = create_access_token(identity=user.id)
+            access_token = create_access_token(identity=str(user.id))
             return {"access_token": access_token}, 200
 
         abort(409, "Invalid password or login credentials")
