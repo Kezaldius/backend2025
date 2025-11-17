@@ -6,6 +6,7 @@ RUN python -m pip install -r requirements.txt
 
 COPY . /app
 COPY entrypoint.sh /app/entrypoint.sh
+RUN apt-get update && apt-get install -y dos2unix && \dos2unix /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
 ENTRYPOINT ["/app/entrypoint.sh"]
 
