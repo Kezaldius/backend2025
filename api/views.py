@@ -16,8 +16,8 @@ def healthcheck():
 
 
 
-@blp.route("/register", methods=["POST"])
-class UserRegister():
+@blp.route("/register")
+class UserRegister(MethodView):
     @blp.arguments(UserSchema)
     @blp.response(201, UserSchema(exclude=("records", "categories")))
     def post(self, user_data):
@@ -33,8 +33,8 @@ class UserRegister():
         db.session.commit()
         return user
 
-@blp.route("/login", methods=["POST"])
-class UserLogin():
+@blp.route("/login")
+class UserLogin(MethodView):
     def post(self):
         """Login a user"""
         user_data = request.get_json()
