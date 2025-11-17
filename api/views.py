@@ -49,14 +49,15 @@ class UserLogin(MethodView):
 
 
 
-@jwt_required()
 @blp.route("/user/<int:user_id>")
 class User(MethodView):
+    @jwt_required()
     @blp.response(200, UserSchema)
     def get(self, user_id):
         """Get user by ID"""
         return UserModel.query.get_or_404(user_id)
 
+    @jwt_required()
     @blp.response(204)
     def delete(self, user_id):
         """Delete user by ID"""
@@ -65,14 +66,15 @@ class User(MethodView):
         db.session.commit()
         return ""
 
-@jwt_required()
 @blp.route("/category")
 class CategoryList(MethodView):
+    @jwt_required()
     @blp.response(200, CategorySchema(many=True))
     def get(self):
         """Get all general categories and user-specific categories"""
         return CategoryModel.query.all()
 
+    @jwt_required()
     @blp.arguments(CategorySchema)
     @blp.response(201, CategorySchema)
     def post(self, category_data):
@@ -82,14 +84,16 @@ class CategoryList(MethodView):
         db.session.commit()
         return category
 
-@jwt_required()
+
 @blp.route("/category/<int:category_id>")
 class Category(MethodView):
+    @jwt_required()
     @blp.response(200, CategorySchema)
     def get(self, category_id):
         """Get category by ID"""
         return CategoryModel.query.get_or_404(category_id)
 
+    @jwt_required()
     @blp.response(204)
     def delete(self, category_id):
         """Delete category by ID"""
