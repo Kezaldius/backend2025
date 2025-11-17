@@ -39,7 +39,7 @@ class UserLogin():
         """Login a user"""
         user_data = request.get_json()
 
-        user = UserModel.query.filter(UserModel.id == user_data["name"]).first()
+        user = UserModel.query.filter(UserModel.name == user_data["name"]).first()
 
         if user and user.check_password(user_data["password"]):
             access_token = create_access_token(identity=user.id)
