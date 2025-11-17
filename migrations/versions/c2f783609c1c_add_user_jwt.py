@@ -1,8 +1,8 @@
-"""Initial migration
+"""Add user JWT
 
-Revision ID: afd0fe15a794
+Revision ID: c2f783609c1c
 Revises: 
-Create Date: 2025-11-03 12:45:17.175387
+Create Date: 2025-11-17 18:28:02.977612
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'afd0fe15a794'
+revision = 'c2f783609c1c'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -21,6 +21,7 @@ def upgrade():
     op.create_table('users',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=50), nullable=False),
+    sa.Column('password_hash', sa.String(length=128), nullable=False),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('categories',
