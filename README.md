@@ -23,9 +23,10 @@ cd backend2025
 2. **Створіть файл конфігурації середовища:**  
 Створіть файл .env у кореневій папці проєкту та наповните його наступним вмістом:  
 ```  
-  POSTGRES_USER=postgres  
-  POSTGRES_PASSWORD=postgres  
+  POSTGRES_USER=postgresuser  
+  POSTGRES_PASSWORD=postgrespassword   
   POSTGRES_DB=mydb  
+  JWT_SECRET_KEY=jwtsecretkey
   ```
 3. **Запустіть додаток:**  
 Відкрийте термінал у кореневій папці проєкту та виконайте команду:
