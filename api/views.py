@@ -15,36 +15,6 @@ def healthcheck():
     return {"status": "OK", "message": "Application is healthy"}
 
 
-@blp.route("/debug_jwt")
-class JWTDebug(MethodView):
-    def get(self):
-        info = {}
-
-        from flask import current_app
-        info["JWT_SECRET_KEY"] = repr(current_app.config.get("JWT_SECRET_KEY"))
-
-        auth_header = request.headers.get("Authorization")
-        info["Authorization header"] = repr(auth_header)
-
-        if auth_header and auth_header.startswith("Bearer "):
-            token = auth_header.split(" ")[1]
-            info["raw_token"] = token
-            try:
-                decoded = decode_token(token, allow_expired=True)
-                info["decoded_token"] = decoded
-            except Exception as e:
-                info["decoded_error"] = str(e)
-
-            try:
-                verify_jwt_in_request()
-                info["verify_jwt_in_request"] = "PASSED"
-            except Exception as e:
-                info["verify_jwt_in_request"] = f"FAILED: {str(e)}"
-        else:
-            info["token_present"] = False
-
-        return jsonify(info)
-
 
 @blp.route("/register")
 class UserRegister(MethodView):
